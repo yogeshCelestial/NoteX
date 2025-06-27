@@ -33,7 +33,7 @@ export default function RootLayout({
         <Navbar />
         <SidebarProvider>
           <AppSidebar />
-          <main>
+          <main className="w-full min-h-screen">
             {children}
           </main>
         </SidebarProvider>

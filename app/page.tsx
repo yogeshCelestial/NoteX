@@ -2,13 +2,13 @@ import TakeNote from "@/components/TakeNote";
 
 export default function Home() {
   return (
-    <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-      <div className="flex flex-col gap-4 w-full max-w-3xl">
-        <div>
-          <TakeNote />
-        </div>
-        <div>
-        </div>
+    <main className="flex flex-col w-full min-h-screen">
+      <div className="mx-auto w-1/2 p-4">
+        <TakeNote />
+      </div>
+      <br />
+      <div className="mx-auto w-4/5 p-4">
+        First
       </div>
     </main>
   );
