@@ -1,18 +1,42 @@
-import { Home, Settings } from "lucide-react"
+import { NotebookIcon, NotebookPenIcon, Trash2 } from "lucide-react"
 import Link from "next/link"
+import React from "react"
 
 export function Sidebar() {
+  const items = [
+    {
+      href: "/#notes",
+      label: "Notes",
+      icon: <NotebookPenIcon className="h-4 w-4" />
+    },
+    {
+      href: "/#labels",
+      label: "Labels",
+      icon: <NotebookIcon className="h-4 w-4" />
+    },
+    {
+      href: "/#trash",
+      label: "Trash",
+      icon: <Trash2 className="h-4 w-4" />
+    }
+  ]
   return (
-    <aside className="w-64 h-[calc(100vh-4rem)] border-r bg-muted px-4 py-6">
+    <aside className="w-64 h-[calc(100vh-4rem)] pr-4 py-4">
       <nav className="space-y-2">
-        <Link href="/" className="flex items-center gap-2 text-sm font-medium">
-          <Home className="h-4 w-4" />
-          Home
-        </Link>
-        <Link href="/settings" className="flex items-center gap-2 text-sm font-medium">
-          <Settings className="h-4 w-4" />
-          Settings
-        </Link>
+        {items.map((item) => (
+            <Link
+            key={item.href}
+              href={item.href}
+              className="flex items-center text-lg px-2 py-1 rounded-r-full hover:bg-gray-200"
+            >
+              <span className="flex items-center gap-2 px-2">
+                {item.icon}
+                {item.label}
+              </span>
+            </Link>
+        ))}
+
+
       </nav>
     </aside>
   )
