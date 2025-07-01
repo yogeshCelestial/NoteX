@@ -1,13 +1,6 @@
 import { pool } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-
-
-const hashPassword = (pass: string) => {
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(pass, salt);
-    return hash;
-}
+import { hashPassword } from "@/lib/password";
 
 export async function POST(req: NextRequest) {
     try {
@@ -30,5 +23,4 @@ export async function POST(req: NextRequest) {
             { status: 500 }
         );
     }
-
 };
