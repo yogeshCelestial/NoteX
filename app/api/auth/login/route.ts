@@ -1,7 +1,8 @@
 import { pool } from "@/lib/db";
 import { comparePassword } from "@/lib/password";
-import { issueAccessToken, issueRefreshToken } from "@/lib/tokens";
+import { hashToken, issueAccessToken, issueRefreshToken } from "@/lib/tokens";
 import { NextRequest, NextResponse } from "next/server";
+import { v4 } from 'uuid';
 
 export async function POST(req: NextRequest) {
     try {
@@ -19,27 +20,31 @@ export async function POST(req: NextRequest) {
         const isPasswordCorrect = await comparePassword(password, hashed_password);
 
         // if wrong password
-        if (!isPasswordCorrect) return NextResponse.json({ message: 'Unathorised!' }, { status: 401 });
+        if (!isPasswordCorrect) return NextResponse.json({ message: 'Unauthorised!' }, { status: 401 });
 
         // if everything okay - generate access token and refresh token
-        const refresh_token = await issueRefreshToken({ id: id });
-       
-        console.log(refresh_token, 'here is refresh token');
-        const session = (await pool.query(`INSERT INTO sessions (token, user_id) VALUES ($1, $2) RETURNING id`, [refresh_token, id])).rows;
+        const uuid = v4();
+
+        const refresh_token = await issueRefreshToken({ id: uuid });
+        const hashed_token = await hashToken(refresh_token);
+
+        const session = (await pool.query(`INSERT INTO sessions (id, token, user_id) VALUES ($1, $2, $3) RETURNING id`, [uuid, hashed_token, id])).rows;
         const sessionId = session[0]?.id;
 
         // sending refresh token to frontend
-        const response = NextResponse.json({ message: 'Cookie set!', data: { sessionId: sessionId, refresh_token: refresh_token }});
-        const token = await issueAccessToken({ id: id });
+        if (sessionId) {
+            const response = NextResponse.json({ message: 'Cookie set!', data: { refresh_token: refresh_token } });
+            const token = await issueAccessToken({ id: id });
 
-        // setting access-token to secure cookies
-        response.cookies.set('access-token', token, {
-            httpOnly: true, // Recommended for security
-            secure: process.env.NODE_ENV === 'production', // Use secure in production
-            maxAge: 60 * 60, // 1 hr
-            path: '/',
-        });
-        return response;
+            // setting access-token to secure cookies
+            response.cookies.set('access-token', token, {
+                httpOnly: true, // Recommended for security
+                secure: process.env.NODE_ENV === 'production', // Use secure in production
+                maxAge: 60 * 60, // 1 hr
+                path: '/',
+            });
+            return response;
+        }
     } catch (error: unknown) {
         return NextResponse.json({ message: error instanceof Error ? error.message : 'Internal Server Error' }, { status: 500 });
     }
