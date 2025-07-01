@@ -6,7 +6,6 @@ export async function POST(req: NextRequest) {
     try {
         const authorization = req.headers.get('Authorization');
         const token = authorization?.split(' ')[1];
-        const res = NextResponse.json({ token: token });
         const result = await verifyRefreshToken(token!);
         let sessionId: string | undefined = undefined;
         if (typeof result === "object" && result !== null && "session_id" in result) {
@@ -41,7 +40,6 @@ export async function POST(req: NextRequest) {
                 return response;
             }
         }
-        return res;
     } catch (error: unknown) {
         console.log(error)
         return NextResponse.json({ mesaage: error instanceof Error ? error?.message : 'Internal Server Error!' }, { status: 500 });
