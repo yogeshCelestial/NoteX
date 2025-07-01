@@ -1,6 +1,6 @@
 import { pool } from "@/lib/db";
 import { comparePassword } from "@/lib/password";
-import { issueAccessToken } from "@/lib/tokens";
+import { issueAccessToken, issueRefreshToken } from "@/lib/tokens";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -21,9 +21,18 @@ export async function POST(req: NextRequest) {
         // if wrong password
         if (!isPasswordCorrect) return NextResponse.json({ message: 'Unathorised!' }, { status: 401 });
 
-        // if everything okay
+        // if everything okay - generate access token and refresh token
+        const refresh_token = await issueRefreshToken({ id: id });
+       
+        console.log(refresh_token, 'here is refresh token');
+        const session = (await pool.query(`INSERT INTO sessions (token, user_id) VALUES ($1, $2) RETURNING id`, [refresh_token, id])).rows;
+        const sessionId = session[0]?.id;
+
+        // sending refresh token to frontend
+        const response = NextResponse.json({ message: 'Cookie set!', data: { sessionId: sessionId, refresh_token: refresh_token }});
         const token = await issueAccessToken({ id: id });
-        const response = NextResponse.json({ message: 'Cookie set!' });
+
+        // setting access-token to secure cookies
         response.cookies.set('access-token', token, {
             httpOnly: true, // Recommended for security
             secure: process.env.NODE_ENV === 'production', // Use secure in production
