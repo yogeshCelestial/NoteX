@@ -13,15 +13,15 @@ interface HTTPOBJ {
     Authorization: string,
     [key: string]: string
   }
-  authorization?: string,
+  authorization?: boolean,
   data?: {
-  [key: string]: FormDataEntryValue | string;
+    [key: string]: FormDataEntryValue | string;
   }
 }
 
-export type Response = { [key: string] : {
-  [key: string]: string;
-}};
+export type Response = {
+  [key: string]: string | Response
+};
 
 export async function request(httpObj: HTTPOBJ, successHandler: (res: Response) => void, errorHandler: (err: Error) => void) {
   const baseURL = process.env.API_URL || 'http://localhost:3000/api';
@@ -31,6 +31,7 @@ export async function request(httpObj: HTTPOBJ, successHandler: (res: Response) 
     baseURL,
     url: httpObj.endpoint,
     method,
+    withCredentials: httpObj?.authorization || true,
     headers: httpObj.headers || {
       "Content-Type": 'application/json'
     },

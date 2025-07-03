@@ -28,9 +28,11 @@ export function AuthForm({
   const isSignUp = Boolean(formType !== 'login');
 
   const loginSuccess = (response: Response) => {
-    localStorage.setItem('refresh_token', response?.data?.refresh_token);
+    if (typeof (response.data) === 'object' && 'refresh_token' in response.data) {
+      localStorage.setItem('refresh_token', String(response?.data?.refresh_token));
+      router.push('/');
+    }
     setLoading(false);
-    router.push('/');
   };
 
   const loginOrSignupFailed = (error: Error) => {
@@ -52,7 +54,7 @@ export function AuthForm({
 
     if (isSignUp) {
       if (plainData.password === plainData.confirmPassword) {
-        const httpObj = { endpoint: '/auth/register', data: plainData }
+        const httpObj = { endpoint: '/auth/register', data: plainData, authorization: false }
         request(httpObj, signUpSuccess, loginOrSignupFailed);
       } else {
         console.warn("Password and Confirm Password didn't match");
@@ -74,7 +76,7 @@ export function AuthForm({
             {
               isSignUp ? 'Sign Up' : 'Login'
             }
-            </CardTitle>
+          </CardTitle>
           <CardDescription>
             Enter your email {isSignUp && 'create a password'} below to {isSignUp ? 'create' : 'login to'} your account
           </CardDescription>
