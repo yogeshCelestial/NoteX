@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
         const data = (await pool.query(`SELECT id, email, hashed_password FROM users WHERE email=$1`, [email])).rows;
 
         // if user is not registered
-        if (data.length === 0) return NextResponse.json({ message: 'User with this email is not registered!' }, { status: 404 });
+        if (data.length === 0) return NextResponse.json({ message: 'User with this email is not registered!' }, { status: 400 });
 
         const { hashed_password, id = '' } = data[0];
         const isPasswordCorrect = await comparePassword(password, hashed_password);
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
             const token = await issueAccessToken({ id: id });
 
             // setting access-token to secure cookies
-            response.cookies.set('access-token', token, {
+            response.cookies.set('access_token', token, {
                 httpOnly: true, // Recommended for security
                 secure: process.env.NODE_ENV === 'production', // Use secure in production
                 maxAge: 60 * 60, // 1 hr
