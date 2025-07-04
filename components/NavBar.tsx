@@ -9,11 +9,15 @@ import { logoutHandler } from "@/lib/logout";
 
 export function Navbar() {
   const user = useAuth();
-  console.log(user, 'user');
+
   useEffect(() => {
     if (!user.loading && !user.isAuthenticated) redirect('/login');
   }, [user]);
 
+  const logout = () => {
+    logoutHandler();
+    user.setUser(null);
+  }
 
   return (
     <header className="w-full h-16 bg-sidebar px-4 flex items-center justify-between">
@@ -22,7 +26,7 @@ export function Navbar() {
         <Input placeholder="Search Notes" className="" />
       </div>
       <div>
-        <Button variant='outline' onClick={logoutHandler}>Logout</Button>
+        <Button variant='outline' onClick={logout}>Logout</Button>
       </div>
     </header>
   )
