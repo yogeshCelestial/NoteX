@@ -7,10 +7,12 @@ export async function POST(req: NextRequest) {
         const authorization = req.headers.get('Authorization');
         const token = authorization?.split(' ')[1];
         const result = await verifyRefreshToken(token!);
+        if (!result.valid) return NextResponse.json({ message: result.error?.message }, { status: result.error?.name === 'TokenExpiredError' ? 401 : 403 });
+        const { payload = {} } = result;
         let sessionId: string | undefined = undefined;
-        if (typeof result === "object" && result !== null && "session_id" in result) {
+        if (typeof payload === "object" && payload !== null && "session_id" in payload) {
             // check if there is a session exist
-            sessionId = (result as { session_id?: string }).session_id;
+            sessionId = (result.payload as { session_id?: string }).session_id;
             const session = (await pool.query(`SELECT token, is_active, user_id FROM sessions WHERE id=$1`, [sessionId])).rows;
 
             if (session.length === 0) return NextResponse.json({ message: 'No Sessions Available!' }, { status: 401 });
@@ -24,14 +26,14 @@ export async function POST(req: NextRequest) {
             const hashed_token = await hashToken(refresh_token);
 
             const sessionUpdated = (await pool.query(`UPDATE sessions SET token = $2, last_used = NOW() WHERE id = $1 RETURNING id`, [sessionId, hashed_token])).rows;
-        
+
             // sending new refresh token to frontend
             if (sessionUpdated) {
-                const response = NextResponse.json({ message: 'Cookie set!', data: { refresh_token: refresh_token } });
+                const response = NextResponse.json({ message: 'Cookie set!', refresh_token: refresh_token });
                 const token = await issueAccessToken({ id: session[0]?.user_id });
 
                 // setting access-token to secure cookies
-                response.cookies.set('access-token', token, {
+                response.cookies.set('access_token', token, {
                     httpOnly: true, // Recommended for security
                     secure: process.env.NODE_ENV === 'production', // Use secure in production
                     maxAge: 60 * 60, // 1 hr

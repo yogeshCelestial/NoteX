@@ -1,6 +1,7 @@
 'use client'
 
-import { request, Response } from "@/lib/utils";
+import { httpHelper } from "@/lib/httpHelper";
+import { Response } from "@/lib/httpHelper";
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 type User = {
@@ -26,27 +27,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const success = (response: Response) => {
     // Assuming the user data is in response.data
     setUser(response.data as User);
+    setLoading(false);
   }
 
   const failed = (error: Error) => {
     console.log(error.message);
     setUser(null);
+    setLoading(false);
   }
 
   // Fetch current user on mount
   useEffect(() => {
     const fetchUser = async () => {
-      try {
-        const http = {
-          endpoint: '/auth/me',
-          method: 'GET',
-        }
-        await request(http, success, failed);
-      } catch {
-        setUser(null);
-      } finally {
-        setLoading(false);
+      const http = {
+        endpoint: '/auth/me',
+        method: 'GET',
       }
+      await httpHelper(http, success, failed);
     };
     fetchUser();
   }, []);

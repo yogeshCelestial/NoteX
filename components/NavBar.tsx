@@ -3,31 +3,17 @@
 import { useAuth } from "@/context/auth";
 import { Input } from "./ui/input";
 import { useEffect } from "react";
-import { redirect, useRouter } from "next/navigation";
-import { request } from "@/lib/utils";
+import { redirect } from "next/navigation";
 import { Button } from "./ui/button";
+import { logoutHandler } from "@/lib/logout";
 
 export function Navbar() {
   const user = useAuth();
-
+  console.log(user, 'user');
   useEffect(() => {
     if (!user.loading && !user.isAuthenticated) redirect('/login');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  const router = useRouter();
+  }, [user]);
 
-  const logoutSuccess = () => {
-    localStorage.removeItem('refresh_token');
-    router.push('/login');
-  };
-
-  const logoutHandler = () => {
-    request({
-      endpoint: '/auth/logout', authorization: false, headers: {
-        Authorization: `Bearer ${localStorage.getItem('refresh_token')}`,
-      }
-    }, logoutSuccess, () => { })
-  }
 
   return (
     <header className="w-full h-16 bg-sidebar px-4 flex items-center justify-between">

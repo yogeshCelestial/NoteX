@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import jwt from 'jsonwebtoken';
 import bcrypt from "bcryptjs";
 
@@ -8,10 +9,19 @@ export const issueAccessToken = async (user: { id: string }) => {
 }
 
 export const verifyAccessToken = async (token: string) => {
-    const result = await jwt.verify(token, process.env.JWT_SECRET!);
-    console.log(result);
-    return result;
-}
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+        return { valid: true, payload: decoded };
+    } catch (error: any) {
+        return {
+            valid: false,
+            error: {
+                name: error.name,
+                message: error.message
+            }
+        };
+    }
+};
 
 export const issueRefreshToken = async (user: { id: string }) => {
     const { id } = user;
@@ -20,10 +30,19 @@ export const issueRefreshToken = async (user: { id: string }) => {
 }
 
 export const verifyRefreshToken = async (token: string) => {
-    const result = await jwt.verify(token, process.env.SESSION_SECRET!);
-    console.log(result);
-    return result;
-}
+    try {
+        const decoded = jwt.verify(token, process.env.SESSION_SECRET!);
+        return { valid: true, payload: decoded };
+    } catch (error: any) {
+        return {
+            valid: false,
+            error: {
+                name: error.name,
+                message: error.message
+            }
+        };
+    }
+};
 
 export const decodeJWT = async (token: string) => {
     const result = await jwt.decode(token);

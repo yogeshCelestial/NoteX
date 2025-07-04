@@ -13,7 +13,6 @@ interface HTTPOBJ {
     Authorization: string,
     [key: string]: string
   }
-  authorization?: boolean,
   data?: {
     [key: string]: FormDataEntryValue | string;
   }
@@ -31,7 +30,7 @@ export async function request(httpObj: HTTPOBJ, successHandler: (res: Response) 
     baseURL,
     url: httpObj.endpoint,
     method,
-    withCredentials: httpObj?.authorization || true,
+    withCredentials: false,
     headers: httpObj.headers || {
       "Content-Type": 'application/json'
     },
