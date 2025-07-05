@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import React, { FormEvent, useState } from "react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 interface AuthFormProps extends React.ComponentProps<"div"> {
   formType?: 'login' | 'signup';
@@ -36,7 +37,10 @@ export function AuthForm({
   };
 
   const loginOrSignupFailed = (error: Error) => {
-    console.log(error.message);
+     toast("Operation Failed!", {
+            description: error?.message || 'Try Again.',
+      });
+      setLoading(false);
   }
 
   const signUpSuccess = (response: Response) => {

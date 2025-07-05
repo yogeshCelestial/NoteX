@@ -15,7 +15,7 @@ export function Navbar() {
   }, [user]);
 
   const logout = () => {
-    logoutHandler();
+    logoutHandler(true);
     user.setUser(null);
   }
 

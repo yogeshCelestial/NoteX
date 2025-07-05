@@ -5,6 +5,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils";
 import { httpHelper } from "@/lib/httpHelper";
+import { toast } from "sonner";
 
 type FormData = {
     title: string;
@@ -16,6 +17,18 @@ const TakeNote = () => {
         title: "",
         description: ""
     });
+
+    const success = () => {
+        toast("Saved!", {
+          description: "",
+        });
+    };
+
+    const error = (error: Error) => {
+        toast("Not Saved!", {
+          description: error.message || 'Try Again.',
+        });
+    }
     const onInputFocus = () => {
         setMainFocused(true);
     }
@@ -23,7 +36,7 @@ const TakeNote = () => {
         setMainFocused(false);
         console.log("Note saved:", formData);
         setFormData({ title: "", description: "" });
-        await httpHelper({ endpoint: '/note', method: 'POST', data: formData }, () => console.log('Saved!'), () => console.log('Not Saved!'))
+        await httpHelper({ endpoint: '/note', method: 'POST', data: formData }, success , error)
     }
 
     return (
