@@ -13,6 +13,7 @@ export type Response = { [key: string]: string | Response };
 
 const baseURL = process.env.API_URL || 'http://localhost:3000/api';
 
+// function to rotate token
 async function refreshAccessToken(refresh_token: string) {
     try {
         const response = await axios({
@@ -40,6 +41,7 @@ export async function httpHelper(
 ) {
     const method = httpObj.method || 'POST';
     try {
+        // original request
         const res = await axios({
             baseURL,
             url: httpObj.endpoint,
@@ -52,6 +54,7 @@ export async function httpHelper(
     } catch (err: any) {
         const refresh_token = localStorage.getItem('refresh_token');
         const status = err?.response?.status || err?.status;
+        // in case token expired but refresh token exist
         if (status === 401 && refresh_token) {
             const refreshed = await refreshAccessToken(refresh_token);
             if (refreshed) {
@@ -68,19 +71,24 @@ export async function httpHelper(
                     successHandler(res?.data || {});
                     return;
                 } catch (retryErr: any) {
-                    // user cannot be re-authenticated
-                    if (retryErr.status === 401) {
+                    if (retryErr.status === 401 || retryErr.status === 403) {
+                        // if retry of original request failed with token invialidity - user cannot be re-authenticated
                         logoutHandler();
                     } else {
+                        // if some other error in retry of original request
                         errorHandler(retryErr);
                     }
                     return;
                 }
             } else {
-                errorHandler(err);
+                // if some error occured in refreshing the token
                 logoutHandler();
                 return;
             }
+        } else if ((status === 401 || status === 403) && !refresh_token) {
+            // in case access token invalid/expired and doesn't have refresh token
+            logoutHandler();
+            // in case we have some other error (status code)
         } else {
             errorHandler(err);
         }
