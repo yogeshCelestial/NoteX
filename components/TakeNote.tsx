@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Input } from "./ui/input";
 import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils";
+import { httpHelper } from "@/lib/httpHelper";
 
 type FormData = {
     title: string;
@@ -17,23 +19,22 @@ const TakeNote = () => {
     const onInputFocus = () => {
         setMainFocused(true);
     }
-    const blueCapture = () => {
+    const blueCapture = async () => {
         setMainFocused(false);
-        alert("Note saved successfully!");
         console.log("Note saved:", formData);
-        setFormData({ title: "", description: "" }); // Reset form data after saving
-
+        setFormData({ title: "", description: "" });
+        await httpHelper({ endpoint: '/note', method: 'POST', data: formData }, () => console.log('Saved!'), () => console.log('Not Saved!'))
     }
 
     return (
         <div>
-            <Input placeholder="Take a note..." className="w-full" onFocus={onInputFocus} value={formData.title} onChange={((e) => setFormData((prev: FormData) => { return { ...prev, title: e.target.value } }))} />
+            <Input placeholder="Take a note..." className={cn(['border-1 border-black'], mainFocused ? ['border-b-0'] : [''])} onFocus={onInputFocus} value={formData.title} onChange={((e) => setFormData((prev: FormData) => { return { ...prev, title: e.target.value } }))} />
             {mainFocused && (
                 <Textarea
                     value={formData.description}
                     onChange={((e) => setFormData((prev: FormData) => { return { ...prev, description: e.target.value } }))}
                     placeholder="Description"
-                    className="w-full border-none resize-none"
+                    className="w-full border-1 border-black border-t-0 resize-none"
                     onBlurCapture={blueCapture}
                 />
             )}
