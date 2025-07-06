@@ -23,11 +23,10 @@ export type Response = {
 };
 
 export async function request(httpObj: HTTPOBJ, successHandler: (res: Response) => void, errorHandler: (err: Error) => void) {
-  const baseURL = process.env.API_URL || 'http://localhost:3000/api';
-  console.log(baseURL)
+  // const baseURL = process.env.API_URL || 'http://localhost:3000/api';
   const method = httpObj.method || 'POST';
   await axios({
-    baseURL,
+    // baseURL,
     url: httpObj.endpoint,
     method,
     withCredentials: false,

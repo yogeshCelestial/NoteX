@@ -11,13 +11,13 @@ interface httpObj {
 
 export type Response = { [key: string]: string | Response };
 
-const baseURL = process.env.API_URL || 'http://localhost:3000/api';
+// const baseURL = process.env.API_URL || 'http://localhost:3000/api';
 
 // function to rotate token
 async function refreshAccessToken(refresh_token: string) {
     try {
         const response = await axios({
-            baseURL,
+            // baseURL,
             url: '/auth/refresh',
             method: 'POST',
             withCredentials: false,
@@ -43,7 +43,7 @@ export async function httpHelper(
     try {
         // original request
         const res = await axios({
-            baseURL,
+            // baseURL,
             url: httpObj.endpoint,
             method,
             withCredentials: true,
@@ -61,7 +61,7 @@ export async function httpHelper(
                 // Retry original request
                 try {
                     const res = await axios({
-                        baseURL,
+                        // baseURL,
                         url: httpObj.endpoint,
                         method,
                         withCredentials: true,
