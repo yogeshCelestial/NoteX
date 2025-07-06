@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     let sessionId: string | undefined = undefined;
     if (result.valid && typeof result.payload === "object" && result.payload !== null && "session_id" in result.payload) {
         // check if there is a session exist
-        sessionId = (result as { session_id?: string }).session_id;
+        sessionId = (result.payload as { session_id?: string }).session_id;
         if (sessionId) {
             await pool.query(`DELETE FROM sessions WHERE id = $1`, [sessionId]);
         }
