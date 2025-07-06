@@ -44,7 +44,7 @@ export const NoteCard = (props: NoteDetails) => {
                 </CardAction>
             </CardHeader>
             <CardContent>
-                <p>{description} Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur, harum iste odit corrupti illo necessitatibus soluta minima quia perspiciatis quidem atque, saepe architecto illum maiores accusamus rerum reiciendis quisquam. Unde!</p>
+                <p>{description}</p>
             </CardContent>
             <CardFooter>
                 <p>{bg_color}</p>
