@@ -18,7 +18,7 @@ async function refreshAccessToken(refresh_token: string) {
     try {
         const response = await axios({
             // baseURL,
-            url: '/auth/refresh',
+            url: '/api/auth/refresh',
             method: 'POST',
             withCredentials: false,
             headers: { Authorization: `Bearer ${refresh_token}` },

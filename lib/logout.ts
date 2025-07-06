@@ -15,7 +15,7 @@ const logoutSuccess = (auth = true) => {
 
 export const logoutHandler = (auth: boolean) => {
     request({
-        endpoint: '/auth/logout', headers: {
+        endpoint: '/api/auth/logout', headers: {
             Authorization: `Bearer ${localStorage.getItem('refresh_token')}`,
         }
     }, () => logoutSuccess(auth), () => { })

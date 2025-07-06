@@ -14,7 +14,7 @@ export default function Home() {
   useEffect(() => {
     const getNotes = async () => {
       await httpHelper(
-        { endpoint: '/note', method: 'GET' },
+        { endpoint: '/api/note', method: 'GET' },
         (response) => {
           if (response && Array.isArray(response.notes)) {
             setNotes(response.notes);

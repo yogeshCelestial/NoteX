@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const fetchUser = async () => {
       const http = {
-        endpoint: '/auth/me',
+        endpoint: '/api/auth/me',
         method: 'GET',
       }
       await httpHelper(http, success, failed);

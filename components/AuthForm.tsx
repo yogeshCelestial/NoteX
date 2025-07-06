@@ -58,7 +58,7 @@ export function AuthForm({
 
     if (isSignUp) {
       if (plainData.password === plainData.confirmPassword) {
-        const httpObj = { endpoint: '/auth/register', data: plainData, authorization: false }
+        const httpObj = { endpoint: '/api/auth/register', data: plainData, authorization: false }
         request(httpObj, signUpSuccess, loginOrSignupFailed);
       } else {
         console.warn("Password and Confirm Password didn't match");
@@ -66,7 +66,7 @@ export function AuthForm({
       }
 
     } else {
-      const httpObj = { endpoint: '/auth/login', data: plainData }
+      const httpObj = { endpoint: '/api/auth/login', data: plainData }
       request(httpObj, loginSuccess, loginOrSignupFailed);
     }
   };

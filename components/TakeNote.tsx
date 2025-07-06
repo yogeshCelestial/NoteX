@@ -36,7 +36,7 @@ const TakeNote = () => {
         setMainFocused(false);
         console.log("Note saved:", formData);
         setFormData({ title: "", description: "" });
-        await httpHelper({ endpoint: '/note', method: 'POST', data: formData }, success , error)
+        await httpHelper({ endpoint: '/api/note', method: 'POST', data: formData }, success , error)
     }
 
     return (
