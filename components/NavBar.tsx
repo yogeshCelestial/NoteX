@@ -1,22 +1,21 @@
 'use client'
 
-import { useAuth } from "@/context/auth";
+import { AuthContextType } from "@/context/auth";
 import { Input } from "./ui/input";
-import { useEffect } from "react";
-import { redirect } from "next/navigation";
 import { Button } from "./ui/button";
 import { logoutHandler } from "@/lib/logout";
 
-export function Navbar() {
-  const user = useAuth();
+type NavProps = {
+  user: AuthContextType
+}
 
-  useEffect(() => {
-    if (!user.loading && !user.isAuthenticated) redirect('/login');
-  }, [user]);
+export function Navbar(props : NavProps) {
+  const { user = null } = props
+  
 
   const logout = () => {
     logoutHandler(true);
-    user.setUser(null);
+    if (user) user.setUser(null);
   }
 
   return (

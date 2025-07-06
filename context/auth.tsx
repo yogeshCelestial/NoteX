@@ -11,7 +11,7 @@ type User = {
   updated_at: string,
 };
 
-type AuthContextType = {
+export  type AuthContextType = {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;

@@ -1,3 +1,5 @@
+'use client'
+
 import {
     Card,
     CardAction,
@@ -6,9 +8,11 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Pin } from 'lucide-react';
 import { Button } from "./ui/button";
+import { httpHelper } from "@/lib/httpHelper";
+import { toast } from "sonner";
 
 export type Note = {
     [key: string]: string,
@@ -20,8 +24,25 @@ export type NoteDetails = {
     bg_color: string
 }
 
-export default function Notes(props: { notes: Note[] }) {
-    const { notes = [] } = props;
+export default function Notes() {
+    const [notes, setNotes] = useState<Note[]>([]);
+
+    useEffect(() => {
+        const getNotes = async () => {
+            await httpHelper(
+                { endpoint: '/api/note', method: 'GET' },
+                (response) => {
+                    if (response && Array.isArray(response.notes)) {
+                        setNotes(response.notes);
+                    } else {
+                        setNotes([]);
+                    }
+                },
+                (error) => { toast('Error Fetching Notes!', { description: error?.message || "Try Again" }) }
+            );
+        };
+        getNotes();
+    }, []);
     return (
         <React.Fragment>
             {notes.map((note) => (
