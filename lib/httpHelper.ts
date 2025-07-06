@@ -87,7 +87,10 @@ export async function httpHelper(
             }
         } else if ((status === 401 || status === 403) && !refresh_token) {
             // in case access token invalid/expired and doesn't have refresh token
-            logoutHandler(false);
+            logoutHandler(true);
+            setTimeout(() => {
+            window.location.href = '/login';
+        }, 1000);
             // in case we have some other error (status code)
         } else {
             errorHandler(err);
