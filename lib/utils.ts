@@ -29,7 +29,7 @@ export async function request(httpObj: HTTPOBJ, successHandler: (res: Response) 
     // baseURL,
     url: httpObj.endpoint,
     method,
-    withCredentials: false,
+    withCredentials: true,
     headers: httpObj.headers || {
       "Content-Type": 'application/json'
     },

@@ -14,17 +14,15 @@ export type Response = { [key: string]: string | Response };
 // const baseURL = process.env.API_URL || 'http://localhost:3000/api';
 
 // function to rotate token
-async function refreshAccessToken(refresh_token: string) {
+async function refreshAccessToken() {
     try {
         const response = await axios({
             // baseURL,
             url: '/api/auth/refresh',
             method: 'POST',
-            withCredentials: false,
-            headers: { Authorization: `Bearer ${refresh_token}` },
+            withCredentials: true,
         });
-        if (response.data && 'refresh_token' in response.data) {
-            localStorage.setItem('refresh_token', String(response.data.refresh_token));
+        if (response) {
             return true;
         }
     } catch (err: any) {
@@ -32,6 +30,19 @@ async function refreshAccessToken(refresh_token: string) {
         // ignore, handled in main flow
     }
     return false;
+};
+
+const fetchWithAccessToken = async (obj: httpObj, success: (res: Response) => void) => {
+    const method = obj.method || 'POST';
+    const res = await axios({
+        // baseURL,
+        url: obj.endpoint,
+        method,
+        withCredentials: true,
+        headers: obj.headers || { "Content-Type": 'application/json' },
+        data: JSON.stringify(obj.data),
+    });
+    success(res?.data || {});
 }
 
 export async function httpHelper(
@@ -39,40 +50,21 @@ export async function httpHelper(
     successHandler: (res: Response) => void,
     errorHandler: (err: Error) => void
 ) {
-    const method = httpObj.method || 'POST';
     try {
         // original request
-        const res = await axios({
-            // baseURL,
-            url: httpObj.endpoint,
-            method,
-            withCredentials: true,
-            headers: httpObj.headers || { "Content-Type": 'application/json' },
-            data: JSON.stringify(httpObj.data),
-        });
-        successHandler(res?.data || {});
+        await fetchWithAccessToken(httpObj, successHandler);
     } catch (err: any) {
-        const refresh_token = localStorage.getItem('refresh_token');
         const status = err?.response?.status || err?.status;
-        // in case token expired but refresh token exist
-        if (status === 401 && refresh_token) {
-            const refreshed = await refreshAccessToken(refresh_token);
+        if (status === 401) {
+            const refreshed = await refreshAccessToken();
             if (refreshed) {
                 // Retry original request
                 try {
-                    const res = await axios({
-                        // baseURL,
-                        url: httpObj.endpoint,
-                        method,
-                        withCredentials: true,
-                        headers: httpObj.headers || { "Content-Type": 'application/json' },
-                        data: JSON.stringify(httpObj.data),
-                    });
-                    successHandler(res?.data || {});
+                    await fetchWithAccessToken(httpObj, successHandler);
                     return;
                 } catch (retryErr: any) {
-                    if (retryErr.status === 401 || retryErr.status === 403) {
-                        // if retry of original request failed with token invialidity - user cannot be re-authenticated
+                    if (retryErr.status === 401) {
+                        // if retry of original request failed with token invalidity - user cannot be re-authenticated
                         logoutHandler(false);
                     } else {
                         // if some other error in retry of original request
@@ -85,13 +77,6 @@ export async function httpHelper(
                 logoutHandler(false);
                 return;
             }
-        } else if ((status === 401 || status === 403) && !refresh_token) {
-            // in case access token invalid/expired and doesn't have refresh token
-            logoutHandler(true);
-            setTimeout(() => {
-            window.location.href = '/login';
-        }, 1000);
-            // in case we have some other error (status code)
         } else {
             errorHandler(err);
         }

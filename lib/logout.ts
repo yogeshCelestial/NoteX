@@ -2,7 +2,6 @@ import { toast } from 'sonner';
 import { request } from './utils';
 
 const logoutSuccess = (auth = true) => {
-    localStorage.removeItem('refresh_token');
     if (!auth) {
         toast("Authentication Failed!", {
             description: "Please login again.",
@@ -15,8 +14,6 @@ const logoutSuccess = (auth = true) => {
 
 export const logoutHandler = (auth: boolean) => {
     request({
-        endpoint: '/api/auth/logout', headers: {
-            Authorization: `Bearer ${localStorage.getItem('refresh_token')}`,
-        }
+        endpoint: '/api/auth/logout', 
     }, () => logoutSuccess(auth), () => { })
 }

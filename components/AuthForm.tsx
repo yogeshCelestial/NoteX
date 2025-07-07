@@ -28,11 +28,8 @@ export function AuthForm({
   const router = useRouter();
   const isSignUp = Boolean(formType !== 'login');
 
-  const loginSuccess = (response: Response) => {
-    if (typeof (response.data) === 'object' && 'refresh_token' in response.data) {
-      localStorage.setItem('refresh_token', String(response?.data?.refresh_token));
-      router.push('/');
-    }
+  const loginSuccess = () => {
+    router.push('/');
     setLoading(false);
   };
 
