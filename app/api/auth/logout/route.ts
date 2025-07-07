@@ -3,8 +3,8 @@ import { verifyRefreshToken } from "@/lib/tokens";
 import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(req: NextRequest) {
-    const token = String(req.cookies.get('refresh_token'));
-    const result = await verifyRefreshToken(token!);
+    const token = req.cookies.get('refresh_token')?.value;
+    const result = await verifyRefreshToken(token || '');
     let sessionId: string | undefined = undefined;
     if (result.valid && typeof result.payload === "object" && result.payload !== null && "session_id" in result.payload) {
         // check if there is a session exist

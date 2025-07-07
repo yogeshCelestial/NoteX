@@ -63,8 +63,8 @@ export async function httpHelper(
                     await fetchWithAccessToken(httpObj, successHandler);
                     return;
                 } catch (retryErr: any) {
-                    if (retryErr.status === 401 || retryErr.status === 403) {
-                        // if retry of original request failed with token invialidity - user cannot be re-authenticated
+                    if (retryErr.status === 401) {
+                        // if retry of original request failed with token invalidity - user cannot be re-authenticated
                         logoutHandler(false);
                     } else {
                         // if some other error in retry of original request
@@ -77,13 +77,6 @@ export async function httpHelper(
                 logoutHandler(false);
                 return;
             }
-        } else if (status === 403) {
-            // in case access token invalid/expired
-            logoutHandler(true);
-            setTimeout(() => {
-                window.location.href = '/login';
-            }, 1000);
-            // in case we have some other error (status code)
         } else {
             errorHandler(err);
         }

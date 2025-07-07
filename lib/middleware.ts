@@ -13,6 +13,6 @@ export const withAuth = async (req: NextRequest,   handler: (abc: JWTPayload ) =
     if (parsed?.valid && parsed?.payload) {
         return handler(parsed.payload);
     } else {
-        return NextResponse.json({ message: parsed.error?.message }, { status: parsed.error?.name === 'TokenExpiredError' ? 401 : 403 });
+        return NextResponse.json({ message: parsed.error?.message }, { status: 401 });
     }
 }
