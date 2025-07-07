@@ -4,10 +4,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
     try {
-        const authorization = req.headers.get('Authorization');
-        const token = authorization?.split(' ')[1];
-        const result = await verifyRefreshToken(token!);
-        if (!result.valid) return NextResponse.json({ message: result.error?.message }, { status: result.error?.name === 'TokenExpiredError' ? 401 : 403 });
+        const token = String(req.cookies.get('refresh_token'));
+        const result = await verifyRefreshToken(token);
+        if (!result.valid) return NextResponse.json({ message: result.error?.message }, { status: 401 });
         const { payload = {} } = result;
         let sessionId: string | undefined = undefined;
         if (typeof payload === "object" && payload !== null && "session_id" in payload) {
@@ -29,7 +28,13 @@ export async function POST(req: NextRequest) {
 
             // sending new refresh token to frontend
             if (sessionUpdated) {
-                const response = NextResponse.json({ message: 'Cookie set!', refresh_token: refresh_token });
+                const response = NextResponse.json({ message: 'Cookie set!' });
+                response.cookies.set('refresh_token', refresh_token, {
+                    httpOnly: true, // Recommended for security
+                    secure: process.env.NODE_ENV === 'production', // Use secure in production
+                    maxAge: 60 * 60 * 24 * 7, // 7 days
+                    path: '/',
+                });
                 const token = await issueAccessToken({ id: session[0]?.user_id });
 
                 // setting access-token to secure cookies

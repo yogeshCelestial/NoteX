@@ -33,7 +33,13 @@ export async function POST(req: NextRequest) {
 
         // sending refresh token to frontend
         if (sessionId) {
-            const response = NextResponse.json({ message: 'Cookie set!', data: { refresh_token: refresh_token } });
+            const response = NextResponse.json({ message: 'Cookie set!'});
+            response.cookies.set('refresh_token', refresh_token, {
+                httpOnly: true, // Recommended for security
+                secure: process.env.NODE_ENV === 'production', // Use secure in production
+                maxAge: 60 * 60 * 24 * 7, // 7 days
+                path: '/',
+            });
             const token = await issueAccessToken({ id: id });
 
             // setting access-token to secure cookies
