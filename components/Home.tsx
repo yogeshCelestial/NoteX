@@ -29,7 +29,7 @@ export default function HomeInside() {
                                     <TakeNote />
                                 </div>
                                 <br />
-                                <div className="mx-auto w-4/5 p-4">
+                                <div className="mx-auto w-9/10 p-4">
                                     <Notes />
                                 </div>
                             </React.Fragment>

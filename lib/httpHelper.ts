@@ -6,7 +6,7 @@ interface httpObj {
     endpoint: string,
     method?: string,
     headers?: { [key: string]: string },
-    data?: { [key: string]: FormDataEntryValue | string }
+    data?: { [key: string]: FormDataEntryValue | string | boolean }
 }
 
 export type Response = { [key: string]: string | Response };
