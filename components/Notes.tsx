@@ -94,20 +94,17 @@ export default function Notes() {
 export const NoteCard = (props: NoteDetails) => {
     const { title, description, bg_color, id, is_pinned, pinClickHandler, deleteNote } = props;
     return (
-        <Card className="relative">
-            <CardHeader>
+        <Card className={`${bg_color} ${bg_color ? 'text-white' : 'text-black'}`}>
+            <CardHeader className="relative">
+                <Button className="absolute top-0 right-0 rounded" onClick={() => pinClickHandler(id, !is_pinned)} variant='ghost'>
+                    {is_pinned ? <Pin /> : <PinOff />}
+                </Button>
                 <CardTitle>{title}</CardTitle>
-                <CardAction>
-                    <Button className="absolute top-0 right-0 rounded" onClick={() => pinClickHandler(id, !is_pinned)} variant='ghost'>
-                        {is_pinned ? <Pin /> : <PinOff />}
-                    </Button>
-                </CardAction>
             </CardHeader>
             <CardContent>
                 <p className="break-words">{description}</p>
             </CardContent>
             <CardFooter className="relative">
-                <p>{bg_color}</p>
                 <Button className="absolute bottom-0 right-0 rounded" onClick={() => deleteNote(id)} variant='ghost'>
                     <Trash2 />
                 </Button>

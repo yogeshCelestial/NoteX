@@ -6,26 +6,42 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils";
 import { httpHelper } from "@/lib/httpHelper";
 import { toast } from "sonner";
+import { Palette } from 'lucide-react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "./ui/button";
+import { Checkbox } from "./ui/checkbox";
+import { Label } from "./ui/label";
 
 type FormData = {
     title: string;
     description: string;
+    bg_color: string;
+    is_pinned: boolean;
 };
 
+const colors = ["bg-red-700", "bg-blue-700", "bg-green-700", "bg-yellow-700", "bg-purple-700", "bg-orange-700", "bg-pink-700", "bg-white"]
+
 const TakeNote = () => {
-    const [openModal, setOpenModal] = useState(false);
-    const [formData, setFormData] = useState<FormData>({
+    const initialState = {
         title: "",
-        description: ""
-    });
+        description: "",
+        bg_color: "bg-white",
+        is_pinned: false
+    }
+    const [openModal, setOpenModal] = useState(false);
+    const [formData, setFormData] = useState<FormData>(initialState);
 
     const success = () => {
         toast("Saved!", {
@@ -42,7 +58,7 @@ const TakeNote = () => {
     const save = async () => {
         setOpenModal(false);
         console.log("Note saved:", formData);
-        setFormData({ title: "", description: "" });
+        setFormData(initialState);
         await httpHelper({ endpoint: '/api/note', method: 'POST', data: formData }, success, error)
     }
 
@@ -52,13 +68,13 @@ const TakeNote = () => {
             <Dialog open={openModal} onOpenChange={(open) => {
                 if (!open) {
                     setOpenModal(false);
-                    setFormData({ title: "", description: "" })
+                    setFormData(initialState)
                 }
             }}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Take a note</DialogTitle>
-                        <DialogDescription>
+                        <DialogTitle className="mb-4 text-center">Take a note</DialogTitle>
+                        <div>
                             <Input placeholder="Title" className={cn(['border-1 border-black mb-2'])} value={formData.title} onChange={((e) => setFormData((prev: FormData) => { return { ...prev, title: e.target.value } }))} />
                             <Textarea
                                 value={formData.description}
@@ -66,11 +82,38 @@ const TakeNote = () => {
                                 placeholder="Description"
                                 className="w-full border-1 border-black resize-none mb-2"
                             />
-                            <div className="flex justify-end gap-2">
-                                <Button variant="outline" onClick={() => { setOpenModal(false); setFormData({ title: "", description: "" }) }}>Close</Button>
-                                <Button onClick={save}>Save</Button>
+
+                            <div className="flex justify-between">
+                                <div className="flex justify-start gap-2 items-center">
+                                    <div>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant='outline'><Palette className="w-2 h-2" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent side="right" align="start" className="w-full">
+                                                <DropdownMenuRadioGroup onValueChange={(value) => { setFormData((prev: FormData) => { return { ...prev, bg_color: value } }) }} className="flex flex-row justify-between">
+                                                    {colors.map((color) => (
+                                                        <DropdownMenuRadioItem className="px-1 py-0" key={color} value={color}>
+                                                            <div className={cn([`w-5 h-5 rounded-full ${color} ${(formData.bg_color === color || color === 'bg-white') ? 'border-1 border-black' : 'border-0'}`])} />
+                                                        </DropdownMenuRadioItem>
+                                                    ))}
+                                                </DropdownMenuRadioGroup>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
+                                    {formData?.bg_color && (
+                                        <div className={cn([`w-6 h-6 rounded-full border-1 border-black ${formData?.bg_color}`])} />
+                                    )}
+                                    <Label htmlFor="cb">Pin to top</Label>
+                                    <Checkbox id="cb" onCheckedChange={(value) => { setFormData((prev: FormData) => { return { ...prev, is_pinned: !!value } }) }} className="w-6 h-6" />
+                                </div>
+                                <div className="flex justify-end gap-2">
+                                    <Button variant="outline" onClick={() => { setOpenModal(false); setFormData(initialState) }}>Close</Button>
+                                    <Button onClick={save}>Save</Button>
+                                </div>
                             </div>
-                        </DialogDescription>
+                        </div>
                     </DialogHeader>
                 </DialogContent>
             </Dialog>
