@@ -1,75 +1,77 @@
 'use client'
 
-import {
-    Card,
-    CardAction,
-    CardContent,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import React, { useEffect, useState } from "react";
-import { Pin } from 'lucide-react';
-import { Button } from "./ui/button";
+import React, { useEffect } from "react";
 import { httpHelper } from "@/lib/httpHelper";
 import { toast } from "sonner";
+import Masonry from 'react-masonry-css'
+import './notes.css'
+import useNotesStore from "@/store/useNotesStore";
+import Loader from "./Loader";
+import { NoteCard } from "./NoteCard";
 
 export type Note = {
-    [key: string]: string,
+    id: string,
+    title: string,
+    description: string,
+    bg_color: string,
+    is_pinned: boolean,
+    created_at?: string,
+    updated_at?: string,
 }
 
 export type NoteDetails = {
     title: string,
     description: string,
     bg_color: string
+    id: string
+    is_pinned: boolean
+    pinClickHandler: (id: string, patch: boolean) => void
+    deleteNote: (id: string) => void
+
 }
+const breakpointColumnsObj = {
+    default: 4,
+    1100: 3,
+    700: 2,
+    300: 1
+};
 
 export default function Notes() {
-    const [notes, setNotes] = useState<Note[]>([]);
+    const notesStore = useNotesStore() as {
+        notes: Note[],
+        isLoading: boolean,
+        error: any,
+        fetchNotes: () => void
+        deleteNote: (id: string) => void
+    };
+    const { notes, isLoading, error, fetchNotes, deleteNote } = notesStore;
 
     useEffect(() => {
-        const getNotes = async () => {
-            await httpHelper(
-                { endpoint: '/api/note', method: 'GET' },
-                (response) => {
-                    if (response && Array.isArray(response.notes)) {
-                        setNotes(response.notes);
-                    } else {
-                        setNotes([]);
-                    }
-                },
-                (error) => { toast('Error Fetching Notes!', { description: error?.message || "Try Again" }) }
-            );
-        };
-        getNotes();
+        fetchNotes();
     }, []);
+
+    const handlePin = async (id: string, patch: boolean) => {
+        await httpHelper(
+            { endpoint: `/api/note/${id}`, method: 'PATCH', data: { is_pinned: patch.toString() } },
+            (response) => { toast('Pinned!'); console.log(response?.data); fetchNotes(); },
+            (error) => { toast('Operation Failed!', { description: error?.message || "Try Again" }) }
+        );
+    }
+
     return (
         <React.Fragment>
-            {notes.map((note) => (
-                <NoteCard key={note.id} title={note.title} description={note.description} bg_color={note.bg_color} />
-            ))}
+            {!isLoading ? (
+                <Masonry
+                    breakpointCols={breakpointColumnsObj}
+                    className="my-masonry-grid"
+                    columnClassName="my-masonry-grid_column">
+                    {notes.map((note) => (
+                        <NoteCard key={note.id} title={note.title} description={note.description} bg_color={note.bg_color} id={note.id} is_pinned={note.is_pinned === true} pinClickHandler={handlePin} deleteNote={deleteNote} />
+                    ))}
+                </Masonry>
+            )
+                : (<Loader />) // will be replace by shimmer UI later
+            }
         </React.Fragment>
-    )
-}
-
-export const NoteCard = (props: NoteDetails) => {
-    const { title, description, bg_color } = props;
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>{title}</CardTitle>
-                <CardAction>
-                    <Button variant='ghost'>
-                        <Pin />
-                    </Button>
-                </CardAction>
-            </CardHeader>
-            <CardContent>
-                <p>{description}</p>
-            </CardContent>
-            <CardFooter>
-                <p>{bg_color}</p>
-            </CardFooter>
-        </Card>
     )
 }

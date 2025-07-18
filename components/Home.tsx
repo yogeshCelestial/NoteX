@@ -25,11 +25,11 @@ export default function HomeInside() {
                         (
                             <React.Fragment>
                                 <Navbar user={user} />
-                                <div className="mx-auto w-1/2 p-4">
+                                <div className="mx-auto w-3/4 md:w-3/7 py-4">
                                     <TakeNote />
                                 </div>
                                 <br />
-                                <div className="mx-auto w-4/5 p-4">
+                                <div className="mx-auto w-9/10 p-4">
                                     <Notes />
                                 </div>
                             </React.Fragment>
