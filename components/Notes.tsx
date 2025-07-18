@@ -40,14 +40,14 @@ export default function Notes() {
     const notesStore = useNotesStore() as {
         notes: Note[],
         isLoading: boolean,
-        error: any,
         fetchNotes: () => void
         deleteNote: (id: string) => void
     };
-    const { notes, isLoading, error, fetchNotes, deleteNote } = notesStore;
+    const { notes, isLoading, fetchNotes, deleteNote } = notesStore;
 
     useEffect(() => {
         fetchNotes();
+        
     }, []);
 
     const handlePin = async (id: string, patch: boolean) => {
