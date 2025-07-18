@@ -9,9 +9,9 @@ export const POST = async (req: NextRequest) => {
                 const id = (payload as { id: string }).id;
                 const { title, description, bg_color = '', is_pinned = false } = await req.json();
                 if (!title && !description) return NextResponse.json({ message: 'Title/Content is necessory' }, { status: 400 });
-                const inserted = (await pool.query(`INSERT INTO notes (title, description, bg_color, is_pinned, created_by) VALUES ($1, $2, $3, $4, $5) RETURNING id;`, [title, description, bg_color, is_pinned, id]))?.rows;
+                const inserted = (await pool.query(`INSERT INTO notes (title, description, bg_color, is_pinned, created_by) VALUES ($1, $2, $3, $4, $5) RETURNING *;`, [title, description, bg_color, is_pinned, id]))?.rows;
                 if (!inserted.length) return NextResponse.json({ message: 'Some Error Occured at Database' }, { status: 500 });
-                return NextResponse.json({ message: 'Note Created!' }, { status: 201 });
+                return NextResponse.json({ message: 'Note Created!', note: inserted[0] }, { status: 201 });
             }
             return NextResponse.json({ message: 'Invalid payload' }, { status: 400 });
         });

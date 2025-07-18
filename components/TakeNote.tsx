@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";
-import { httpHelper } from "@/lib/httpHelper";
-import { toast } from "sonner";
 import { Palette } from 'lucide-react';
 import {
     DropdownMenu,
@@ -30,6 +28,7 @@ type FormData = {
     is_pinned: boolean;
 };
 import { Editor } from 'primereact/editor';
+import useNotesStore from "@/store/useNotesStore";
 
 const colors = ["bg-red-900", "bg-blue-900", "bg-green-900", "bg-yellow-900", "bg-purple-900", "bg-orange-900", "bg-pink-900", "bg-white"]
 
@@ -53,23 +52,16 @@ const TakeNote = () => {
     const [openModal, setOpenModal] = useState(false);
     const [formData, setFormData] = useState<FormData>(initialState);
 
-    const success = () => {
-        toast("Saved!", {
-            description: "",
-        });
+    const notesStore = useNotesStore() as {
+        addNote: (note: FormData) => void
     };
-
-    const error = (error: Error) => {
-        toast("Not Saved!", {
-            description: error.message || 'Try Again.',
-        });
-    }
+    const { addNote } = notesStore;
 
     const save = async () => {
         setOpenModal(false);
         console.log("Note saved:", formData);
         setFormData(initialState);
-        await httpHelper({ endpoint: '/api/note', method: 'POST', data: formData }, success, error)
+        addNote(formData)
     }
 
     return (

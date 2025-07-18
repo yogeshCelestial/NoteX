@@ -39,10 +39,10 @@ export const DELETE = async (req: NextRequest, context: { params: { id: string }
             if (typeof payload === "object" && payload !== null && "id" in payload) {
                 const id = context.params.id;
                 
-                const query = `DELETE FROM notes WHERE id = $1 RETURNING *;`;
-                const inserted = (await pool.query(query, [id]))?.rows;
-                if (!inserted.length) return NextResponse.json({ message: 'Some Error Occured at Database' }, { status: 500 });
-                return NextResponse.json({ message: 'Note Deleted!' }, { status: 200 });
+                const query = `DELETE FROM notes WHERE id = $1 RETURNING id;`;
+                const deleted = (await pool.query(query, [id]))?.rows;
+                if (!deleted.length) return NextResponse.json({ message: 'Some Error Occured at Database' }, { status: 500 });
+                return NextResponse.json({ message: 'Note Deleted!', id: deleted[0]?.id || id }, { status: 200 });
             }
             return NextResponse.json({ message: 'Invalid payload' }, { status: 400 });
         });
