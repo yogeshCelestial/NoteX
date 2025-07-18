@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Input } from "./ui/input";
-import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils";
 import { httpHelper } from "@/lib/httpHelper";
 import { toast } from "sonner";
@@ -30,8 +29,19 @@ type FormData = {
     bg_color: string;
     is_pinned: boolean;
 };
+import { Editor } from 'primereact/editor';
 
-const colors = ["bg-red-700", "bg-blue-700", "bg-green-700", "bg-yellow-700", "bg-purple-700", "bg-orange-700", "bg-pink-700", "bg-white"]
+const colors = ["bg-red-900", "bg-blue-900", "bg-green-900", "bg-yellow-900", "bg-purple-900", "bg-orange-900", "bg-pink-900", "bg-white"]
+
+const customToolbar = [
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ list: 'ordered' }, { list: 'bullet' }],
+    ['blockquote', 'code-block'],
+    [{ header: [1, 2, 3, 4, 5, false] }],
+    [{ align: [] }],
+    [{ color: [] }, { background: [] }],
+    ['clean'], // Remove formatting
+];
 
 const TakeNote = () => {
     const initialState = {
@@ -71,16 +81,23 @@ const TakeNote = () => {
                     setFormData(initialState)
                 }
             }}>
-                <DialogContent>
+                <DialogContent className="p-4 w-full">
                     <DialogHeader>
                         <DialogTitle className="mb-4 text-center">Take a note</DialogTitle>
                         <div>
                             <Input placeholder="Title" className={cn(['border-1 border-black mb-2'])} value={formData.title} onChange={((e) => setFormData((prev: FormData) => { return { ...prev, title: e.target.value } }))} />
-                            <Textarea
+                            <Editor
                                 value={formData.description}
-                                onChange={((e) => setFormData((prev: FormData) => { return { ...prev, description: e.target.value } }))}
                                 placeholder="Description"
-                                className="w-full border-1 border-black resize-none mb-2"
+                                onTextChange={(e) =>
+                                    setFormData((prev: FormData) => ({
+                                        ...prev,
+                                        description: e.htmlValue ?? "",
+                                    }))
+                                }
+                                modules={{ toolbar: customToolbar }}
+                                showHeader={false}
+                                style={{ height: '320px', width: '100%', marginBottom: '10px' }}
                             />
 
                             <div className="flex justify-between">
