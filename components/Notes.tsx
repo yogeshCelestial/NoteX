@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import Masonry from 'react-masonry-css'
 import './notes.css'
 import useNotesStore from "@/store/useNotesStore";
-import Loader from "./Loader";
 import { NoteCard } from "./NoteCard";
+import { NotesSkeleton } from "./NotesSkeleton";
 
 export type Note = {
     id: string,
@@ -47,7 +47,7 @@ export default function Notes() {
 
     useEffect(() => {
         fetchNotes();
-        
+
     }, []);
 
     const handlePin = async (id: string, patch: boolean) => {
@@ -60,7 +60,7 @@ export default function Notes() {
 
     return (
         <React.Fragment>
-            {!isLoading ? (
+            {!isLoading ? (notes.length > 0 ? (
                 <Masonry
                     breakpointCols={breakpointColumnsObj}
                     className="my-masonry-grid"
@@ -68,9 +68,13 @@ export default function Notes() {
                     {notes.map((note) => (
                         <NoteCard key={note.id} title={note.title} description={note.description} bg_color={note.bg_color} id={note.id} is_pinned={note.is_pinned === true} pinClickHandler={handlePin} deleteNote={deleteNote} />
                     ))}
-                </Masonry>
+                </Masonry>)
+                :
+                (<h3 className="scroll-m-20 text-2xl font-semibold tracking-tight text-center mt-20">
+                    note you add will appear here
+                </h3>)
             )
-                : (<Loader />) // will be replace by shimmer UI later
+                : (<NotesSkeleton />)
             }
         </React.Fragment>
     )
