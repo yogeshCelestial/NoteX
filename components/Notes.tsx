@@ -20,7 +20,6 @@ export type Note = {
 
 export type NoteDetails = {
     note: Note
-    deleteNote: (id: string) => void
 }
 
 const breakpointColumnsObj = {
@@ -90,7 +89,7 @@ export default function Notes() {
                                 className="my-masonry-grid"
                                 columnClassName="my-masonry-grid_column">
                                 {pinnedNotes.map((note) => (
-                                    <NoteCard key={note.id} note={note} deleteNote={deleteNote} />
+                                    <NoteCard key={note.id} note={note} />
                                 ))}
                             </Masonry>
                         </React.Fragment>
@@ -105,7 +104,7 @@ export default function Notes() {
                                 className="my-masonry-grid"
                                 columnClassName="my-masonry-grid_column">
                                 {unPinnedNotes.map((note) => (
-                                    <NoteCard key={note.id} note={note} deleteNote={deleteNote} />
+                                    <NoteCard key={note.id} note={note} />
                                 ))}
                             </Masonry>
                         </React.Fragment>
