@@ -20,11 +20,7 @@ export type Note = {
 }
 
 export type NoteDetails = {
-    title: string,
-    description: string,
-    bg_color: string
-    id: string
-    is_pinned: boolean
+    note: Note
     pinClickHandler: (id: string, patch: boolean) => void
     deleteNote: (id: string) => void
 
@@ -66,7 +62,7 @@ export default function Notes() {
                     className="my-masonry-grid"
                     columnClassName="my-masonry-grid_column">
                     {notes.map((note) => (
-                        <NoteCard key={note.id} title={note.title} description={note.description} bg_color={note.bg_color} id={note.id} is_pinned={note.is_pinned === true} pinClickHandler={handlePin} deleteNote={deleteNote} />
+                        <NoteCard key={note.id} note={note} pinClickHandler={handlePin} deleteNote={deleteNote} />
                     ))}
                 </Masonry>)
                 :
