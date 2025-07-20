@@ -12,4 +12,11 @@ const useNote = create((set) => ({
     closeEdit: () => set({ note: null, isEdit: false }),
 }));
 
+const useSearch = create((set) => ({
+    query: '',
+
+    setQuery: (query: string) => set({ query: query }),
+}))
+
+export { useSearch };
 export default useNote;

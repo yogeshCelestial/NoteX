@@ -6,6 +6,8 @@ import './notes.css'
 import useNotesStore from "@/store/useNotesStore";
 import { NoteCard } from "./NoteCard";
 import { NotesSkeleton } from "./NotesSkeleton";
+import { useSearch } from "@/store/useNoteStore";
+import { describe } from "node:test";
 
 export type Note = {
     id: string,
@@ -30,6 +32,7 @@ const breakpointColumnsObj = {
 };
 
 export default function Notes() {
+    console.log('Render!!');
     const notesStore = useNotesStore() as {
         notes: Note[],
         isLoading: boolean,
@@ -39,25 +42,44 @@ export default function Notes() {
     const { notes, isLoading, fetchNotes, deleteNote } = notesStore;
     const [pinnedNotes, setPinnedNotes] = useState<Note[]>([]);
     const [unPinnedNotes, setUnPinnedNotes] = useState<Note[]>([]);
+    const [filteredNotes, setFilteredNotes] = useState<Note[]>([]);
+
+    const searchStore = useSearch() as {
+        query: string,
+    };
+
+    const { query } = searchStore;
 
     useEffect(() => {
         fetchNotes();
     }, []);
 
     useEffect(() => {
-        setPinnedNotes(notes.filter((n) => n.is_pinned));
-        setUnPinnedNotes(notes.filter((n) => !n.is_pinned));
-    }, [notes]);
+        if (query) {
+            const filtered = notes.filter((n) => {
+                const text = n.description.replace(/<[^>]*>/g, '');
+                return (n.title.includes(query) || text.includes(query));
+            });
+            setFilteredNotes(filtered);
+        } else {
+            setFilteredNotes(notes);
+        }
+    }, [query, notes])
+
+    useEffect(() => {
+        setPinnedNotes(filteredNotes.filter((n) => n.is_pinned));
+        setUnPinnedNotes(filteredNotes.filter((n) => !n.is_pinned));
+    }, [filteredNotes]);
 
     return (
         <React.Fragment>
             {isLoading && (<NotesSkeleton />)}
-            {!isLoading && notes.length === 0 && (
+            {!isLoading && filteredNotes.length === 0 && (
                 <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight text-center mt-20">
                     notes you add will appear here
                 </h3>
             )}
-            {!isLoading && notes.length > 0 && (
+            {!isLoading && filteredNotes.length > 0 && (
                 <>
                     {pinnedNotes.length > 0 && (
                         <React.Fragment>
