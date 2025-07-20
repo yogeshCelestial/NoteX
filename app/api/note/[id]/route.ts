@@ -6,7 +6,7 @@ export const PATCH = async (req: NextRequest, context: { params: { id: string } 
     try {
         return await withAuth(req, async (payload: JWTPayload) => {
             if (typeof payload === "object" && payload !== null && "id" in payload) {
-                const id = context.params.id;
+                const { id } = await context.params;
                 const body = await req.json();
 
                 const fields = Object.keys(body); // e.g., ['title', 'content']
@@ -18,10 +18,10 @@ export const PATCH = async (req: NextRequest, context: { params: { id: string } 
                 const updates = fields.map((field, idx) => `${field} = $${idx + 1}`).join(', ');
                 const values = fields.map((field) => body[field]);
 
-                const query = `UPDATE notes SET ${updates}, updated_at = NOW() WHERE id = $${fields.length + 1} RETURNING *;`;
-                const inserted = (await pool.query(query, [...values, id]))?.rows;
-                if (!inserted.length) return NextResponse.json({ message: 'Some Error Occured at Database' }, { status: 500 });
-                return NextResponse.json({ message: 'Note Updated!' }, { status: 200 });
+                const query = `UPDATE notes SET ${updates}, updated_at = NOW() WHERE id = $${fields.length + 1} RETURNING id;`;
+                const updated = (await pool.query(query, [...values, id]))?.rows;
+                if (!updated.length) return NextResponse.json({ message: 'Some Error Occured at Database' }, { status: 500 });
+                return NextResponse.json({ message: 'Note Updated!', id: updated[0]?.id  }, { status: 200 });
             }
             return NextResponse.json({ message: 'Invalid payload' }, { status: 400 });
         });
@@ -37,7 +37,7 @@ export const DELETE = async (req: NextRequest, context: { params: { id: string }
     try {
         return await withAuth(req, async (payload: JWTPayload) => {
             if (typeof payload === "object" && payload !== null && "id" in payload) {
-                const id = context.params.id;
+                const { id } = await context.params;
                 
                 const query = `DELETE FROM notes WHERE id = $1 RETURNING id;`;
                 const deleted = (await pool.query(query, [id]))?.rows;

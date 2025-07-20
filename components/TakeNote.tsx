@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";
 import { Palette } from 'lucide-react';
@@ -29,6 +29,8 @@ type FormData = {
 };
 import { Editor } from 'primereact/editor';
 import useNotesStore from "@/store/useNotesStore";
+import useNote from "@/store/useNoteStore";
+import { Note } from "./Notes";
 
 const colors = ["bg-red-900", "bg-blue-900", "bg-green-900", "bg-yellow-900", "bg-purple-900", "bg-orange-900", "bg-pink-900", "bg-white"]
 
@@ -57,12 +59,36 @@ const TakeNote = () => {
     };
     const { addNote } = notesStore;
 
+    const noteState = useNote() as {
+        note: Note,
+        isEdit: boolean,
+        closeEdit: () => void
+    }
+    const { note, isEdit, closeEdit } = noteState;
+
+    useEffect(() => {
+        if (isEdit && note.id) {
+            setFormData({
+                title: note.title || '',
+                description: note.description || '',
+                bg_color: note.bg_color || 'bg-white',
+                is_pinned: note.is_pinned || false,
+            });
+            setOpenModal(true);
+        }
+    }, [note, isEdit]);
+
     const save = async () => {
         setOpenModal(false);
-        console.log("Note saved:", formData);
         setFormData(initialState);
-        addNote(formData)
+        addNote(formData);
     }
+
+    const closeForm = () => {
+        closeEdit();
+        setOpenModal(false);
+        setFormData(initialState);
+    };
 
     return (
         <div>
@@ -70,7 +96,8 @@ const TakeNote = () => {
             <Dialog open={openModal} onOpenChange={(open) => {
                 if (!open) {
                     setOpenModal(false);
-                    setFormData(initialState)
+                    setFormData(initialState);
+                    closeEdit();
                 }
             }}>
                 <DialogContent className="p-4 w-full">
@@ -97,7 +124,7 @@ const TakeNote = () => {
                                     <div>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                                <Button variant='outline'><Palette className="w-2 h-2" />
+                                                <Button className="cursor-pointer" variant='outline'><Palette className="w-2 h-2" />
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent side="right" align="start" className="w-full">
@@ -115,11 +142,11 @@ const TakeNote = () => {
                                         <div className={cn([`w-6 h-6 rounded-full border-1 border-black ${formData?.bg_color}`])} />
                                     )}
                                     <Label htmlFor="cb">Pin to top</Label>
-                                    <Checkbox id="cb" onCheckedChange={(value) => { setFormData((prev: FormData) => { return { ...prev, is_pinned: !!value } }) }} className="w-6 h-6" />
+                                    <Checkbox className="cursor-pointer w-6 h-6" id="cb" onCheckedChange={(value) => { setFormData((prev: FormData) => { return { ...prev, is_pinned: !!value } }) }} />
                                 </div>
                                 <div className="flex justify-end gap-2">
-                                    <Button variant="outline" onClick={() => { setOpenModal(false); setFormData(initialState) }}>Close</Button>
-                                    <Button onClick={save}>Save</Button>
+                                    <Button className="cursor-pointer" variant="outline" onClick={closeForm}>Close</Button>
+                                    <Button className="cursor-pointer" onClick={save}>{isEdit ? 'Update' : 'Save'}</Button>
                                 </div>
                             </div>
                         </div>
