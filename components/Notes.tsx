@@ -7,7 +7,6 @@ import useNotesStore from "@/store/useNotesStore";
 import { NoteCard } from "./NoteCard";
 import { NotesSkeleton } from "./NotesSkeleton";
 import { useSearch } from "@/store/useNoteStore";
-import { describe } from "node:test";
 
 export type Note = {
     id: string,

@@ -26,7 +26,7 @@ export const NoteCard = (props: NoteDetails) => {
     const { editNote } = noteState;
 
     const copyContent = () => {
-        const text = descriptionRef.current?.innerText! || '';
+        const text = descriptionRef?.current?.innerText || '';
         if (text) {
             navigator.clipboard.writeText(text);
             toast('Copied to Clipboard!');
