@@ -80,7 +80,6 @@ const TakeNote = () => {
 
     const save = async () => {
         setOpenModal(false);
-        console.log("Note saved:", formData);
         setFormData(initialState);
         addNote(formData);
     }

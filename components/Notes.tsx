@@ -1,8 +1,6 @@
 'use client'
 
-import React, { useEffect } from "react";
-import { httpHelper } from "@/lib/httpHelper";
-import { toast } from "sonner";
+import React, { useEffect, useState } from "react";
 import Masonry from 'react-masonry-css'
 import './notes.css'
 import useNotesStore from "@/store/useNotesStore";
@@ -21,10 +19,9 @@ export type Note = {
 
 export type NoteDetails = {
     note: Note
-    pinClickHandler: (id: string, patch: boolean) => void
     deleteNote: (id: string) => void
-
 }
+
 const breakpointColumnsObj = {
     default: 4,
     1100: 3,
@@ -40,38 +37,62 @@ export default function Notes() {
         deleteNote: (id: string) => void
     };
     const { notes, isLoading, fetchNotes, deleteNote } = notesStore;
+    const [pinnedNotes, setPinnedNotes] = useState<Note[]>([]);
+    const [unPinnedNotes, setUnPinnedNotes] = useState<Note[]>([]);
 
     useEffect(() => {
         fetchNotes();
-
     }, []);
 
-    const handlePin = async (id: string, patch: boolean) => {
-        await httpHelper(
-            { endpoint: `/api/note/${id}`, method: 'PATCH', data: { is_pinned: patch.toString() } },
-            (response) => { toast('Pinned!'); console.log(response?.data); fetchNotes(); },
-            (error) => { toast('Operation Failed!', { description: error?.message || "Try Again" }) }
-        );
-    }
+    useEffect(() => {
+        setPinnedNotes(notes.filter((n) => n.is_pinned));
+        setUnPinnedNotes(notes.filter((n) => !n.is_pinned));
+    }, [notes]);
 
     return (
         <React.Fragment>
-            {!isLoading ? (notes.length > 0 ? (
-                <Masonry
-                    breakpointCols={breakpointColumnsObj}
-                    className="my-masonry-grid"
-                    columnClassName="my-masonry-grid_column">
-                    {notes.map((note) => (
-                        <NoteCard key={note.id} note={note} pinClickHandler={handlePin} deleteNote={deleteNote} />
-                    ))}
-                </Masonry>)
-                :
-                (<h3 className="scroll-m-20 text-2xl font-semibold tracking-tight text-center mt-20">
-                    note you add will appear here
-                </h3>)
-            )
-                : (<NotesSkeleton />)
-            }
+            {isLoading && (<NotesSkeleton />)}
+            {!isLoading && notes.length === 0 && (
+                <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight text-center mt-20">
+                    notes you add will appear here
+                </h3>
+            )}
+            {!isLoading && notes.length > 0 && (
+                <>
+                    {pinnedNotes.length > 0 && (
+                        <React.Fragment>
+                            <p className="text-muted-foreground font-extrabold text-sm mt-2">
+                                PINNED
+                            </p>
+                            <Masonry
+                                breakpointCols={breakpointColumnsObj}
+                                className="my-masonry-grid"
+                                columnClassName="my-masonry-grid_column">
+                                {pinnedNotes.map((note) => (
+                                    <NoteCard key={note.id} note={note} deleteNote={deleteNote} />
+                                ))}
+                            </Masonry>
+                        </React.Fragment>
+                    )}
+                    {unPinnedNotes.length > 0 && (
+                        <React.Fragment>
+                            {pinnedNotes.length > 0 && (<p className="text-muted-foreground font-extrabold text-sm mt-2">
+                                OTHERS
+                            </p>)}
+                            <Masonry
+                                breakpointCols={breakpointColumnsObj}
+                                className="my-masonry-grid"
+                                columnClassName="my-masonry-grid_column">
+                                {unPinnedNotes.map((note) => (
+                                    <NoteCard key={note.id} note={note} deleteNote={deleteNote} />
+                                ))}
+                            </Masonry>
+                        </React.Fragment>
+                    )}
+                </>
+            )}
+
         </React.Fragment>
+
     )
 }

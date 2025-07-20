@@ -6,11 +6,19 @@ import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } 
 import { useRef } from "react";
 import { toast } from "sonner";
 import useNote from "@/store/useNoteStore";
+import useNotesStore from "@/store/useNotesStore";
 
 export const NoteCard = (props: NoteDetails) => {
-    const { note, pinClickHandler, deleteNote } = props;
+    const { note, deleteNote } = props;
     const { title, description, bg_color, id, is_pinned } = note;
     const descriptionRef = useRef<HTMLParagraphElement>(null);
+
+    const notesStore = useNotesStore() as {
+        pinNote: (id: string, patch: boolean) => void
+    }
+
+    const { pinNote } = notesStore;
+
     const noteState = useNote() as {
         editNote: (n: Note) => void
     }
@@ -32,8 +40,8 @@ export const NoteCard = (props: NoteDetails) => {
             <ContextMenuTrigger>
                 <Card className={`relative ${bg_color} ${(bg_color && bg_color !== 'bg-white') ? 'text-white' : 'text-black'}`}>
                     <CardHeader>
-                        <Button className="absolute top-0 right-0 rounded cursor-pointer" onClick={() => pinClickHandler(id, !is_pinned)} variant='ghost'>
-                            {is_pinned ? <Pin /> : <PinOff />}
+                        <Button className="absolute top-0 right-0 rounded cursor-pointer" onClick={() => pinNote(id, !is_pinned)} variant='ghost'>
+                            {is_pinned ? <PinOff /> : <Pin />}
                         </Button>
                         <CardTitle>{title}</CardTitle>
                     </CardHeader>

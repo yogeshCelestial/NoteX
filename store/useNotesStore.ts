@@ -37,7 +37,7 @@ const useNotesStore = create((set) => ({
                         isLoading: false,
                     }));
                 }
-                toast('Note Saved Successfully!');
+                toast('Note Added!');
             },
             (error) => {
                 toast('Not Saved!!', { description: error?.message || 'Try Again!' });
@@ -50,11 +50,10 @@ const useNotesStore = create((set) => ({
         await httpHelper(
             { endpoint: `/api/note/${id}`, method: 'DELETE' },
             (response) => {
-                console.log(response);
                 set({ isLoading: false, error: null });
                 if (response && response?.id) {
                     set((state: { notes: Note[] }) => ({ notes: state.notes.filter(note => note.id !== response.id) }));
-                    toast('Deleted Success!');
+                    toast('Delete Success!');
                 }
             },
             (error) => {
@@ -62,6 +61,24 @@ const useNotesStore = create((set) => ({
             }
         );
     },
+
+    pinNote: async (id: string, patch: boolean) => {
+        await httpHelper(
+            { endpoint: `/api/note/${id}`, method: 'PATCH', data: { is_pinned: patch } },
+            (response) => {
+                set({ isLoading: false, error: null });
+                if (response && response?.id) {
+                    set((state: { notes: Note[] }) => ({
+                        notes: state.notes.map(note =>
+                            note.id === id ? { ...note, is_pinned: patch } : note
+                        )
+                    }));
+                    toast(patch ? 'Pinned!' : 'Unpinned!!');
+                }
+            },
+            (error) => { toast('Operation Failed!', { description: error?.message || "Try Again" }) }
+        );
+    }
 }));
 
 export default useNotesStore;
