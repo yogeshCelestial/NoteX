@@ -37,7 +37,7 @@ export default function Notes() {
         fetchNotes: () => void
         deleteNote: (id: string) => void
     };
-    const { notes, isLoading, fetchNotes, deleteNote } = notesStore;
+    const { notes, isLoading, fetchNotes } = notesStore;
     const [pinnedNotes, setPinnedNotes] = useState<Note[]>([]);
     const [unPinnedNotes, setUnPinnedNotes] = useState<Note[]>([]);
     const [filteredNotes, setFilteredNotes] = useState<Note[]>([]);
