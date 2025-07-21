@@ -2,11 +2,12 @@ import { pool } from "@/lib/db";
 import { JWTPayload, withAuth } from "@/lib/middleware";
 import { NextRequest, NextResponse } from "next/server";
 
-export const PATCH = async (req: NextRequest, context: { params: { id: string } }) => {
+
+export const PATCH = async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     try {
         return await withAuth(req, async (payload: JWTPayload) => {
             if (typeof payload === "object" && payload !== null && "id" in payload) {
-                const { id } = await context.params;
+                const { id } = await params;
                 const body = await req.json();
 
                 const fields = Object.keys(body); // e.g., ['title', 'content']
@@ -33,11 +34,11 @@ export const PATCH = async (req: NextRequest, context: { params: { id: string } 
     }
 }
 
-export const DELETE = async (req: NextRequest, context: { params: { id: string } }) => {
+export const DELETE = async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     try {
         return await withAuth(req, async (payload: JWTPayload) => {
             if (typeof payload === "object" && payload !== null && "id" in payload) {
-                const { id } = await context.params;
+                const { id } = await params;
                 
                 const query = `DELETE FROM notes WHERE id = $1 RETURNING id;`;
                 const deleted = (await pool.query(query, [id]))?.rows;

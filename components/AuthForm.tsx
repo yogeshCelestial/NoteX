@@ -38,7 +38,7 @@ export function AuthForm({
     setError(error?.response?.data?.message || error?.message);
   }
 
-  const signUpSuccess = (response: Response) => {
+  const signUpSuccess = () => {
     setLoading(false);
     router.push('/login');
   }
