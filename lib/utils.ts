@@ -18,12 +18,20 @@ interface HTTPOBJ {
   }
 }
 
+
+export interface ErrExtnd extends Error {
+  response: {
+    data: {
+      message: string;
+    }
+  }
+}
+
 export type Response = {
   [key: string]: string | Response
 };
 
-export async function request(httpObj: HTTPOBJ, successHandler: (res: Response) => void, errorHandler: (err: Error) => void) {
-  // const baseURL = process.env.API_URL || 'http://localhost:3000/api';
+export async function request(httpObj: HTTPOBJ, successHandler: (res: Response) => void, errorHandler: (err: ErrExtnd) => void) {
   const method = httpObj.method || 'POST';
   await axios({
     // baseURL,

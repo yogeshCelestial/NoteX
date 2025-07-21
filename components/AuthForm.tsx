@@ -1,6 +1,6 @@
 "use client"
 
-import { cn, request, Response } from "@/lib/utils"
+import { cn, ErrExtnd, request, Response } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -13,7 +13,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import React, { FormEvent, useState } from "react"
 import { useRouter } from "next/navigation"
-import { toast } from "sonner"
 
 interface AuthFormProps extends React.ComponentProps<"div"> {
   formType?: 'login' | 'signup';
@@ -25,6 +24,7 @@ export function AuthForm({
   ...props
 }: AuthFormProps) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
   const isSignUp = Boolean(formType !== 'login');
 
@@ -33,21 +33,19 @@ export function AuthForm({
     setLoading(false);
   };
 
-  const loginOrSignupFailed = (error: Error) => {
-     toast("Operation Failed!", {
-            description: error?.message || 'Try Again.',
-      });
-      setLoading(false);
+  const loginOrSignupFailed = (error: ErrExtnd) => {
+    setLoading(false);
+    setError(error?.response?.data?.message || error?.message);
   }
 
   const signUpSuccess = (response: Response) => {
-    console.log('Sign up Success!', response?.message);
     setLoading(false);
     router.push('/login');
   }
 
   const onFormSubmission = (e: FormEvent) => {
     e.preventDefault();
+    setError('');
     setLoading(true);
     const form = e.target as HTMLFormElement
     const formData = new FormData(form);
@@ -58,7 +56,7 @@ export function AuthForm({
         const httpObj = { endpoint: '/api/auth/register', data: plainData, authorization: false }
         request(httpObj, signUpSuccess, loginOrSignupFailed);
       } else {
-        console.warn("Password and Confirm Password didn't match");
+        setError("Passwords didn't match!");
         setLoading(false);
       }
 
@@ -70,7 +68,7 @@ export function AuthForm({
 
   return (
     <div className={cn("flex flex-col gap-6 text-center", className)} {...props}>
-      <p className="text-2xl font-semibold">NoteX</p>
+      <p className="text-3xl font-semibold">NoteX</p>
       <Card>
         <CardHeader>
           <CardTitle>
@@ -83,6 +81,14 @@ export function AuthForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {error && (
+              <Input
+                type="text"
+                value={error}
+                disabled
+                className="text-center border-1 border-red-600 text-red-600 text-sm font-bold mb-4"
+              />
+          )}
           <form name="loginForm" id="login-form" onSubmit={onFormSubmission}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
