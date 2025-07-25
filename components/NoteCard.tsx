@@ -38,7 +38,7 @@ export const NoteCard = (props: NoteDetails) => {
     };
 
     return (
-        <React.Fragment>
+        <div>
             <ContextMenu>
                 <ContextMenuTrigger>
                     <Card className={`relative ${bg_color} ${(bg_color && bg_color !== 'bg-white') ? 'text-white' : 'text-black'}`}>
@@ -65,6 +65,6 @@ export const NoteCard = (props: NoteDetails) => {
                 </ContextMenuContent>
             </ContextMenu>
             <DeleteNoteDialog deleteModal={deleteModal} setDeleteModal={setDeleteModal} id={id} />
-        </React.Fragment>
+        </div>
     )
 }
