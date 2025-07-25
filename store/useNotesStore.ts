@@ -78,6 +78,29 @@ const useNotesStore = create((set) => ({
             },
             (error) => { toast('Operation Failed!', { description: error?.message || "Try Again" }) }
         );
+    },
+
+    updateNote: async (data: Note) => {
+        const id = data?.id;
+        if (!id) {
+            toast('Failed to Update!', { description: 'An unknwon error occured at our end. ' })
+            return;
+        }
+        await httpHelper(
+            { endpoint: `/api/note/${id}`, method: 'PUT', data: data },
+            (response) => {
+                set({ isLoading: false, error: null });
+                if (response && response?.id) {
+                    set((state: { notes: Note[] }) => ({
+                        notes: state.notes.map(note =>
+                            note.id === id ? data : note
+                        )
+                    }));
+                    toast('Updated!');
+                }
+            },
+            (error) => { toast('Operation Failed!', { description: error?.message || "Try Again" }) }
+        )
     }
 }));
 
