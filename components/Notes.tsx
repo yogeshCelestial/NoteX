@@ -30,7 +30,6 @@ const breakpointColumnsObj = {
 };
 
 export default function Notes() {
-    console.log('Render!!');
     const notesStore = useNotesStore() as {
         notes: Note[],
         isLoading: boolean,

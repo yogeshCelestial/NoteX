@@ -26,6 +26,7 @@ type FormData = {
     description: string;
     bg_color: string;
     is_pinned: boolean;
+    id?: string
 };
 import { Editor } from 'primereact/editor';
 import useNotesStore from "@/store/useNotesStore";
@@ -55,9 +56,10 @@ const TakeNote = () => {
     const [formData, setFormData] = useState<FormData>(initialState);
 
     const notesStore = useNotesStore() as {
-        addNote: (note: FormData) => void
+        addNote: (note: FormData) => void,
+        updateNote: (note: FormData) => void
     };
-    const { addNote } = notesStore;
+    const { addNote, updateNote } = notesStore;
 
     const noteState = useNote() as {
         note: Note,
@@ -69,6 +71,7 @@ const TakeNote = () => {
     useEffect(() => {
         if (isEdit && note.id) {
             setFormData({
+                id: note?.id || '',
                 title: note.title || '',
                 description: note.description || '',
                 bg_color: note.bg_color || 'bg-white',
@@ -82,6 +85,12 @@ const TakeNote = () => {
         setOpenModal(false);
         setFormData(initialState);
         addNote(formData);
+    }
+
+    const update = async () => {
+        setOpenModal(false);
+        setFormData(initialState);
+        updateNote(formData);
     }
 
     const closeForm = () => {
@@ -146,7 +155,12 @@ const TakeNote = () => {
                                 </div>
                                 <div className="flex justify-end gap-2">
                                     <Button className="cursor-pointer" variant="outline" onClick={closeForm}>Close</Button>
-                                    <Button className="cursor-pointer" onClick={save}>{isEdit ? 'Update' : 'Save'}</Button>
+                                    {!isEdit
+                                        ? (<Button className="cursor-pointer" onClick={save}>Save</Button>
+                                        )
+                                        : (<Button className="cursor-pointer" onClick={update}>Update</Button>
+                                        )
+                                    }
                                 </div>
                             </div>
                         </div>

@@ -2,11 +2,12 @@ import { pool } from "@/lib/db";
 import { JWTPayload, withAuth } from "@/lib/middleware";
 import { NextRequest, NextResponse } from "next/server";
 
-export const PATCH = async (req: NextRequest, context: { params: { id: string } }) => {
+
+export const PATCH = async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     try {
         return await withAuth(req, async (payload: JWTPayload) => {
             if (typeof payload === "object" && payload !== null && "id" in payload) {
-                const { id } = await context.params;
+                const { id } = await params;
                 const body = await req.json();
 
                 const fields = Object.keys(body); // e.g., ['title', 'content']
@@ -21,7 +22,7 @@ export const PATCH = async (req: NextRequest, context: { params: { id: string } 
                 const query = `UPDATE notes SET ${updates}, updated_at = NOW() WHERE id = $${fields.length + 1} RETURNING id;`;
                 const updated = (await pool.query(query, [...values, id]))?.rows;
                 if (!updated.length) return NextResponse.json({ message: 'Some Error Occured at Database' }, { status: 500 });
-                return NextResponse.json({ message: 'Note Updated!', id: updated[0]?.id  }, { status: 200 });
+                return NextResponse.json({ message: 'Note Updated!', id: updated[0]?.id }, { status: 200 });
             }
             return NextResponse.json({ message: 'Invalid payload' }, { status: 400 });
         });
@@ -33,16 +34,43 @@ export const PATCH = async (req: NextRequest, context: { params: { id: string } 
     }
 }
 
-export const DELETE = async (req: NextRequest, context: { params: { id: string } }) => {
+export const DELETE = async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     try {
         return await withAuth(req, async (payload: JWTPayload) => {
             if (typeof payload === "object" && payload !== null && "id" in payload) {
-                const { id } = await context.params;
-                
+                const { id } = await params;
+
                 const query = `DELETE FROM notes WHERE id = $1 RETURNING id;`;
                 const deleted = (await pool.query(query, [id]))?.rows;
                 if (!deleted.length) return NextResponse.json({ message: 'Some Error Occured at Database' }, { status: 500 });
                 return NextResponse.json({ message: 'Note Deleted!', id: deleted[0]?.id || id }, { status: 200 });
+            }
+            return NextResponse.json({ message: 'Invalid payload' }, { status: 400 });
+        });
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return NextResponse.json({ message: error.message }, { status: 500 });
+        }
+        return NextResponse.json({ message: 'An unknown error occurred' }, { status: 500 });
+    }
+}
+
+export const PUT = async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    try {
+        return await withAuth(req, async (payload: JWTPayload) => {
+            if (typeof payload === "object" && payload !== null && "id" in payload) {
+                const { id } = await params;
+                const body = await req.json();
+
+                const { title = '', description = '', bg_color = '', is_pinned = false } = body;
+                if (!title && !description) {
+                    return NextResponse.json({ message: 'Atleast one property is required to update!' }, { status: 400 });
+                }
+
+                const query = `UPDATE notes SET title = $1, description = $2, is_pinned = $3, bg_color = $4, updated_at = NOW() WHERE id = $5 RETURNING id;`;
+                const updated = (await pool.query(query, [title, description, is_pinned, bg_color, id]))?.rows;
+                if (!updated.length) return NextResponse.json({ message: 'Some Error Occured at Database' }, { status: 500 });
+                return NextResponse.json({ message: 'Note Updated!', id: updated[0]?.id }, { status: 200 });
             }
             return NextResponse.json({ message: 'Invalid payload' }, { status: 400 });
         });

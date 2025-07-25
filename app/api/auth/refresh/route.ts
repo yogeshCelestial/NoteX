@@ -7,7 +7,6 @@ export async function POST(req: NextRequest) {
         const token = req.cookies.get('refresh_token')?.value;
 
         const result = await verifyRefreshToken(token || '');
-        console.log(token, result);
         if (!result.valid) return NextResponse.json({ message: result.error?.message }, { status: 401 });
         const { payload = {} } = result;
         let sessionId: string | undefined = undefined;
