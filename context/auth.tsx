@@ -31,7 +31,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const failed = (error: Error) => {
-    console.log(error.message);
     setUser(null);
     setLoading(false);
   }
