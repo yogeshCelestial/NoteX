@@ -91,6 +91,7 @@ const TakeNote = () => {
         setOpenModal(false);
         setFormData(initialState);
         updateNote(formData);
+        closeEdit();
     }
 
     const closeForm = () => {
